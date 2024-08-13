@@ -5,6 +5,18 @@ Finally, a density plot is generated to show which is the fraction of peaks that
 # Calculation of pause scores
 Codon pause score is calculated by first dividing the count of each peak in the A-site by the ribosomal gene coverage of the gene on which the peak was mapped, obtaining the pause score for each peak. Secondly, the pause scores of peaks mapped on the same codon (intended as trinucleotide sequence) are summed to obtain the codon pause score. Finally, the codon pause score is divided by the total number of RPF reads in ORFs to obtain the normalised codon pause score. 
 # PauseMeter
+Required libraries:
+
+- dplyr
+- magrittr
+- stringr
+- ggplot2
+- readxl
+- ggpubr
+- tools
+- tidyr
+- ggbreak
+
 Usage: Rscript PauseMeter.R <input_folder> <output_folder> <codon_table> [filter_threshold]
 
 Arguments:
