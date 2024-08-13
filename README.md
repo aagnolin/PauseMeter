@@ -14,3 +14,5 @@ Arguments:
 <codon_table>      : Path to the codon usage table Excel file
 
 [filter_threshold] : Optional filter threshold for data (only include data with count >= filter_threshold) [DEFAULT = 1]
+#Additional information
+An Excel file named Test_codon_usage_table.xlsx is provided together with the script for testing purposes. Users can create a file with the same layout containing the codon usage values of their model organism.
