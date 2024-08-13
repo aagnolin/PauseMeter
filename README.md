@@ -4,8 +4,13 @@ The script then uses the output file containing the extracted pause codons and a
 Finally, a density plot is generated to show which is the fraction of peaks that was used in the analysis based on the filter_threshold.
 # PauseMeter
 Usage: Rscript PauseMeter.R <input_folder> <output_folder> <codon_table> [method] [filter_threshold]
+
 Arguments:
+
 <input_folder>     : Path to the input folder containing CSV files
+
 <output_folder>    : Path to the output folder where files will be saved
+
 <codon_table>      : Path to the codon usage table Excel file
+
 [filter_threshold] : Optional filter threshold for data (only include data with count >= filter_threshold) [DEFAULT = 1]
