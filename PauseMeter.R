@@ -11,11 +11,11 @@
 
 ##
 
-# Check if the user requests help or specifies the method
+# Help section
 if (length(commandArgs(trailingOnly = TRUE)) == 0 || any(commandArgs(trailingOnly = TRUE) %in% c("-h", "--help"))) {
   cat("Script Usage:\n")
   cat("--------------\n")
-  cat("Rscript script_name.R <input_folder> <output_folder> <codon_table> [method] [filter_threshold]\n")
+  cat("Rscript PauseMeter.R <input_folder> <output_folder> <codon_table> [filter_threshold]\n")
   cat("\n")
   cat("Arguments:\n")
   cat("<input_folder>     : Path to the input folder containing CSV files.\n")
@@ -36,8 +36,8 @@ if (length(commandArgs(trailingOnly = TRUE)) == 0 || any(commandArgs(trailingOnl
   cat("\n")
   cat("Example Usage:\n")
   cat("--------------\n")
-  cat("Rscript script_name.R /path/to/input/folder /path/to/output/folder /path/to/codon/table.xlsx\n")
-  cat("Rscript script_name.R /path/to/input/folder /path/to/output/folder /path/to/codon/table.xlsx 100\n")
+  cat("Rscript PauseMeter.R /path/to/input/folder /path/to/output/folder /path/to/codon/table.xlsx\n")
+  cat("Rscript PauseMeter.R /path/to/input/folder /path/to/output/folder /path/to/codon/table.xlsx 100\n")
   cat("\n")
   quit(status = 0)
 }
