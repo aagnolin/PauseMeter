@@ -6,7 +6,7 @@
 # Name of script: PauseMeter
 # Summary: alt_predict-based tool that can be used to measure pause scores of codons in ribosome profiling data
 
-# NOTE: this script is meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools).
+# NOTE: this script is meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools) and Normalize_alt_predict.R.
 # Read the README.md file for more information
 
 ##
@@ -24,7 +24,7 @@ if (length(commandArgs(trailingOnly = TRUE)) == 0 || any(commandArgs(trailingOnl
   cat("[filter_threshold] : Optional filter threshold for data (only include data with count >= filter_threshold) [DEFAULT = 1].\n")
   cat("\n")
   cat("Description:\n")
-  cat("This script performs multiple actions on the alt_predict_v2 output files supplied in the input folder:\n")
+  cat("This script performs multiple actions on the alt_predict_v2 output files normalized with Normalize_alt_predict.R supplied in the input folder:\n")
   cat("it first creates a table containing only the highest peak(s) for each gene and after applying the user-defined\n") 
   cat("count threshold (or not if not specified) another table with the pause\n")
   cat("codon of all peaks present in the input file.\n")
