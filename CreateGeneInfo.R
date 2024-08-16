@@ -6,7 +6,16 @@
 # Name of script: CreateGeneInfo.R
 # Summary: 
 
-# NOTE: 
+# NOTE: This script combines the sequence information of a reference genome .fasta file and the gene annotations, 
+# including gene and locus name, strand direction, etc. into a single data frame that can be used to generate
+# pause score calculations, metagene profiles and more using scripts PauseMeter.R and RiboScout.R.
+# The script has been optimized for the reference .fasta and .gff files of B. subtilis NC_000964.3 
+# (files test_annotation.gff and test_genome.fa are included in the PauseMeter repository for testing).
+# Given that especially .gff files can vary in their format and descriptions depending on the model organism, 
+# this script is meant as a help to obtain a final dataset that has a format which is compatible with the other
+# scripts of the PauseMeter repository. It is therefore possible that substantial modifications to this script 
+# may be required in case a different model organism is used.
+
 # Read the README.md file for more information
 
 ##
@@ -61,7 +70,7 @@ for (line in gff_lines) {
       strands <- append(strands, strand)
       gene_names <- append(gene_names, gene_name)  # Append gene name
       
-      # Extract the DNA sequence for the current locus tag and adjust for the strand
+      # Extract the DNA sequence for the current locus tag and adjust for the strand direction
       if (strand == "+") {
         seq <- subseq(genome, start_pos, end_pos)
       } else if (strand == "-") {
