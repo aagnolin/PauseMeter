@@ -60,5 +60,5 @@ A box plot combining the log2-asymmetry scores of all genes is then generated.
 Finally, if method "metagene" is entered, the script will subset all ribosome peaks in the range of coordinates between -20 and 200 (with 0 being the start of the gene) and will assign a position to each ribosomal peak relative to the start coordinate of the gene on which it was mapped (relative_position).
 The resulting data is used to generate a metagene profile plot.
 
-## Additional information
+# Additional information
 An Excel file named Test_codon_usage_table.xlsx is provided together with the script for testing purposes. Users can create a file with the same layout containing the codon usage values of their model organism.
