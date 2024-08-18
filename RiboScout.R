@@ -4,7 +4,7 @@
 
 # Author:  Alberto Agnolin (alberto.agnolin.1@gmail.com)
 # Name of script: RiboScout
-# Summary: alt_predict-based tool that subsets ribosome pausing peaks based on user-defined coordinates to calculate initiation and ORF translation/pausing ratios.
+# Summary: alt_predict-based tool that subsets ribosome pausing peaks based on user-defined coordinates to calculate initiation and ORF ribosomal densities.
 # In addition, the script can calculate log2 asymmetry score and output metagene profile plots
 
 # NOTE: this script is meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools) and Normalize_alt_predict.R.
@@ -19,7 +19,7 @@ usage <- function() {
   cat("Arguments:\n")
   cat("  Normalized_alt_predict_file.csv: output file from alt_predict_v2.py normalized with Normalize_alt_predict.R\n")
   cat("  gene_info_df.csv: file containing gene information generated with CreateGeneInfo.R\n")
-  cat("  <method>: Analysis method ('ranges' or 'asymmetry')\n")
+  cat("  <method>: Analysis method ('ranges', 'asymmetry', or 'metagene')\n")
   cat("  <subtract/add_value_1>: Value to subtract or add relative to start position of each gene (first range) [Only for 'ranges' method]\n")
   cat("  <subtract/add_value_2>: Value to subtract or add relative to start position of each gene (first range) [Only for 'ranges' method]\n")
   cat("  <subtract/add_value_3>: Value to subtract or add relative to start position of each gene (second range) [Only for 'ranges' method]\n")
@@ -54,6 +54,33 @@ if (method == "ranges") {
   value_2 <- as.numeric(args[5])
   value_3 <- as.numeric(args[6])
   value_4 <- as.numeric(args[7])
+  if (value_1 >= 0) {
+    warning("Chosen value_1 is located on or downstream the start of genes (i.e. position 0).
+This will affect the Inititation_ribosomal_density\n")
+  }
+  if (value_2 < value_1) {
+    cat("Invalid option. value_2 cannot be < value_1\n")
+    quit(status = 1, save = "no")
+  }
+  if (value_3 < value_2) {
+    cat("Invalid option. value_3 cannot be < value_2\n")
+    quit(status = 1, save = "no")
+  } 
+  if (value_3 < 0) {
+    cat("Invalid option. Chosen value_3 is located upstream the start of genes (i.e. position 0).\n
+        Choose a value >= 0")
+    quit(status = 1, save = "no")
+  }
+  if (value_4 < 0) {
+    warning("value_4 represents the position relative to the end of genes (i.e. position 0 means the end of genes).
+The chosen value is < 0, which is okay for excluding the effect of the stop codon on ribosome enrichment
+if close to 0, but if highly negative, it can cause inaccurate ORF_ribosomal_density calculation and can 
+potentially overlap or be smaller than value_3, i.e. the start of the second range for short genes\n")
+  } else if (value_4 > 0) {
+    warning("value_4 represents the position relative to the end of genes (i.e. position 0 means the end of genes).
+The chosen value is > 0, therefore the second range will go past the end of the genes, thereby affecting the 
+ORF_ribosomal_density calculation\n")
+  }
 } else if (method == "asymmetry") {
   if (length(args) != 3) {
     cat("Incorrect number of arguments. Check usage below.\n\n")
@@ -86,10 +113,9 @@ input_file_name <- tools::file_path_sans_ext(basename(alt_predict_file))
 output_left_side <- paste0(input_file_name, "_output_left_side.csv")
 output_metagene <- paste0(input_file_name, "_metagene.csv")
 output_right_side <- paste0(input_file_name, "_output_right_side.csv")
-merged_ratios <- paste0(input_file_name, "_merged_ratios.csv")
+merged_densities <- paste0(input_file_name, "_merged_densities.csv")
 merged_halves <- paste0(input_file_name, "_merged_asymmetry.csv")
 plot_name <- paste0(input_file_name, "_metagene_plot.pdf")
-
 
 # First range
 # Choose target positions based on the method (assumes that the provided gene_info_df takes strand direction of genes into consideration)
@@ -167,7 +193,7 @@ if (method == "ranges" | method == "asymmetry") {
 write_csv(input_data_target, output_left_side)
 }
 
-# Calculate initiation ratio if the method is "ranges", 
+# Calculate initiation density if the method is "ranges", 
 # only sum Norm_count if the method is "asymmetry", 
 # or sum Norm_count and include relative position if the method is "metagene"
 if (method == "ranges") {
@@ -175,18 +201,17 @@ if (method == "ranges") {
   df_Ribo_reads_target_1 <- input_data_target %>% 
     group_by(locus_tag) %>% 
     summarize(Sum_Norm_count_initiation = sum(Norm_count)) %>% 
-    mutate(Translation_initiation_Ratio = Sum_Norm_count_initiation / ((abs(value_1) + abs(value_2))))
-  
+    mutate(Inititation_ribosomal_density = Sum_Norm_count_initiation / ((abs(value_1) + abs(value_2))))
 } else if (method == "asymmetry") {
   # Sum Norm_count in the first half of the gene if the method is "asymmetry"
   df_Ribo_reads_target_1 <- input_data_target %>% 
     group_by(locus_tag) %>% 
     summarize(Sum_Norm_count_first_half = sum(Norm_count))
 } else if (method == "metagene") {
-  # Sum Norm_count for metagene target region and include relative position
+  # Summarize data frame for metagene method by including relative position of peaks
   df_Ribo_reads_target_1 <- input_data_target %>% 
     group_by(locus_tag) %>% 
-    summarize(Sum_Norm_count = sum(Norm_count), relative_position = relative_position)
+    summarize(relative_position = relative_position)
   write_csv(df_Ribo_reads_target_1, output_metagene)
   # Create metagene profile plot
   cat("generating metagene profile plot...\n")
@@ -218,7 +243,7 @@ if (method == "ranges") {
   # Generate plot
   ggsave(plot = p, filename = plot_name, device = "pdf")
   
-  cat("complete")
+  cat("Complete\n\n")
   # Stop the script execution if the "metagene" method is used
   quit(status = 0, save = "no")
 }
@@ -292,7 +317,7 @@ input_data_target <- input_data_target %>% filter(!grepl("^BSU_", locus_tag))
 # Write output file 2
 write_csv(input_data_target, output_right_side)
 
-# Calculate ORF translation ratio and merge the two sides if the method is "ranges", 
+# Calculate ORF translation density and merge the two sides if the method is "ranges", 
 # only sum Norm_count of second half and merge the two halves if the method is "asymmetry"
 if (method == "ranges") {
   # Sum Norm_count in target positions for each gene, then divide by the target sequence length
@@ -300,12 +325,12 @@ if (method == "ranges") {
     group_by(locus_tag) %>% 
     summarize(Sum_Norm_count_ORF = sum(Norm_count)) %>% 
     merge(gene_info_df, by = "locus_tag") %>% 
-    mutate(ORF_translation_Ratio = Sum_Norm_count_ORF / (gene_length - value_2))
+    mutate(ORF_ribosomal_density = Sum_Norm_count_ORF / (gene_length - value_3 + value_4))
   # Merge the output data frames of the two ranges
-  Merged_ratios <- merge(df_Ribo_reads_target_1, df_Ribo_reads_target_2, by = "locus_tag", all = TRUE) %>% 
+  Merged_densities_df <- merge(df_Ribo_reads_target_1, df_Ribo_reads_target_2, by = "locus_tag", all = TRUE) %>% 
     select(c(-"StartPosition", -"EndPosition", -"Sequence", -"Strand"))
   # Write final output
-  write_csv(Merged_ratios, merged_ratios)
+  write_csv(Merged_densities_df, merged_densities)
 } else if (method == "asymmetry") {
   # Sum Norm_count in the second half of the gene if the method is "asymmetry"
   df_Ribo_reads_target_2 <- input_data_target %>% 
@@ -320,4 +345,4 @@ if (method == "ranges") {
   # Write final output
   write_csv(merged_halves_df, merged_halves)
 }
-cat("complete\n")
+cat("Complete\n")
