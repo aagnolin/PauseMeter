@@ -1,5 +1,6 @@
 # Introduction
 
+NOTE: these scripts are meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools).
 
 # PauseMeter
 ## Description
@@ -32,11 +33,9 @@ Arguments:
 <codon_table>      : Path to the codon usage table Excel file
 
 [filter_threshold] : Optional filter threshold for data (only include data with count >= filter_threshold) [DEFAULT = 1]
-## Additional information
-An Excel file named Test_codon_usage_table.xlsx is provided together with the script for testing purposes. Users can create a file with the same layout containing the codon usage values of their model organism.
 # RiboScout
 ## Description
-RiboScout is an alt_predict-based R script that subsets ribosome pausing peaks mapped within defined coordinates relative to the start or end of genes to perform further calculations. 
+RiboScout is an alt_predict-based R script that subsets ribosome peaks mapped within defined coordinates relative to the start or end of genes to perform further calculations. 
 This script can calculate initiation and ORF density ratios, log2 asymmetry score, and plot metagene profiles.
 The coordinates can be defined by the user when selecting the "ratios" method or are fixed when selecting the "asymmetry" or "metagene" methods.
 
@@ -53,9 +52,13 @@ Suggested values are:
 
 With this selection, the first range will include the Ribosome Binding Site (RBS) - for most bacteria - and the start and second codon, while the second range will start from the end of the second codon and stop at the end of each gene.
 
-If method "asymmetry" is entered, the script will the the information on genes coordinates and gene lengths stored in the supplied gene_info_df .csv file to locate the first and second half of each gene, and it will sum the counts of ribosomal peaks on each gene for both halves. Finally, the script will calculate the log2-asymmetry score for each gene as follows:
+If method "asymmetry" is entered, the script will use the information on genes coordinates and gene lengths stored in the supplied gene_info_df .csv file to locate the first and second half of each gene, and it will sum the counts of ribosomal peaks on each gene for both halves. Finally, the script will calculate the log2-asymmetry score for each gene as follows:
 - log2_asymmetry_score =  log2(Sum_Norm_count_second_half / Sum_Norm_count_first_half)
 
-A box plot
+A box plot combining the log2-asymmetry scores of all genes is then generated.
 
-## NOTE: this script is meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools) and Normalize_alt_predict.R.
+Finally, if method "metagene" is entered, the script will subset all ribosome peaks in the range of coordinates between -20 and 200 (with 0 being the start of the gene) and will assign a position to each ribosomal peak relative to the start coordinate of the gene on which it was mapped (relative_position).
+The resulting data is used to generate a metagene profile plot.
+
+## Additional information
+An Excel file named Test_codon_usage_table.xlsx is provided together with the script for testing purposes. Users can create a file with the same layout containing the codon usage values of their model organism.
