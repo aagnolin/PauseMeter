@@ -14,7 +14,7 @@
 
 # Define usage function
 usage <- function() {
-  cat("Usage: Rscript PeakFinder_two_sided.R Normalized_alt_predict_file.csv gene_info_df.csv <method> <subtract/add_value_1> <subtract/add_value_2> <subtract/add_value_3> <subtract/add_value_4>\n")
+  cat("Usage: Rscript RiboScout.R Normalized_alt_predict_file.csv gene_info_df.csv <method> <subtract/add_value_1> <subtract/add_value_2> <subtract/add_value_3> <subtract/add_value_4>\n")
   cat("\n")
   cat("Arguments:\n")
   cat("  Normalized_alt_predict_file.csv: output file from alt_predict_v2.py normalized with Normalize_alt_predict.R\n")
@@ -115,8 +115,8 @@ output_metagene <- paste0(input_file_name, "_metagene.csv")
 output_right_side <- paste0(input_file_name, "_output_right_side.csv")
 merged_densities <- paste0(input_file_name, "_merged_densities.csv")
 merged_halves <- paste0(input_file_name, "_merged_asymmetry.csv")
-plot_name <- paste0(input_file_name, "_metagene_plot.pdf")
-
+metagene_plot_name <- paste0(input_file_name, "_metagene_plot.pdf")
+asymmetry_plot_name <- paste0(input_file_name, "_asymmetry_plot.pdf")
 # First range
 # Choose target positions based on the method (assumes that the provided gene_info_df takes strand direction of genes into consideration)
 if (method == "ranges") {
@@ -241,7 +241,7 @@ if (method == "ranges") {
           panel.background = element_rect(linetype = "solid"))
   
   # Generate plot
-  ggsave(plot = p, filename = plot_name, device = "pdf")
+  ggsave(plot = p, filename = metagene_plot_name, device = "pdf")
   
   cat("Complete\n\n")
   # Stop the script execution if the "metagene" method is used
@@ -335,14 +335,39 @@ if (method == "ranges") {
   # Sum Norm_count in the second half of the gene if the method is "asymmetry"
   df_Ribo_reads_target_2 <- input_data_target %>% 
     group_by(locus_tag) %>% 
-    summarize(Sum_Norm_count_second_half = sum(Norm_count))
+    summarize(Sum_Norm_count_second_half = sum(Norm_count), gene_length = gene_length)
   # Merge the output data frames of the two halves
   merged_halves_df <- merge(df_Ribo_reads_target_1, df_Ribo_reads_target_2, by = "locus_tag", all = TRUE)
-  # Calculate log2 asymmetry score
+  # Calculate density per nucleotide and log2-asymmetry score
   merged_halves_df <- merged_halves_df %>% 
-    mutate(log2_asymmetry_score = log2(Sum_Norm_count_second_half / Sum_Norm_count_first_half))
+    mutate(density_per_nt = (Sum_Norm_count_first_half + Sum_Norm_count_second_half)/gene_length, log2_asymmetry_score = log2(Sum_Norm_count_second_half / Sum_Norm_count_first_half))
 
   # Write final output
   write_csv(merged_halves_df, merged_halves)
+  
+  # Generate log2-asymmetry score box plot
+  library(ggplot2)
+  p <- ggplot(data = filter(merged_halves_df),
+         mapping = aes(x = log2_asymmetry_score)) +
+    geom_boxplot(linewidth = 1, fill = "grey45", outlier.alpha = 0.4) +
+    geom_vline(xintercept = 0, col = "red", linewidth = 0.8) +
+    scale_x_continuous(breaks = c(-2, 0, 2)) +
+    #coord_flip() +
+    theme_bw() +
+    labs(x = "log2-Asymmetry score") + 
+    theme(panel.border = element_blank(), 
+          axis.ticks = element_blank(), 
+          panel.grid.major = element_line(linetype = "blank"),
+          panel.grid.minor = element_line(linetype = "blank"),
+          axis.line.x = element_line(color = "black"),
+          axis.ticks.y = element_blank(), 
+          axis.text.y = element_blank(), 
+          axis.title.y = element_blank())
+  ggplot(data = merged_halves_df, 
+         mapping = aes(x = log2_asymmetry_score)) +  
+  geom_boxplot()
+  
+    # Generate plot
+    ggsave(plot = p, filename = asymmetry_plot_name, device = "pdf")
 }
 cat("Complete\n")
