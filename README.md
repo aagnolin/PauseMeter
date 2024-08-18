@@ -36,9 +36,10 @@ Arguments:
 An Excel file named Test_codon_usage_table.xlsx is provided together with the script for testing purposes. Users can create a file with the same layout containing the codon usage values of their model organism.
 # RiboScout
 ## Description
-This is an alt_predict-based script that subsets ribosome pausing peaks mapped within defined coordinates relative to the start or end of genes to perform further calculations. 
+RiboScout is an alt_predict-based R script that subsets ribosome pausing peaks mapped within defined coordinates relative to the start or end of genes to perform further calculations. 
 This script can calculate initiation and ORF translation/pausing ratios, log2 asymmetry score, and plot metagene profiles.
 The coordinates can be defined by the user when selecting the "ratios" method or are fixed when selecting the "asymmetry" or "metagene" methods (see usage section for more information).
-If method "ratios" is entered, the user can choose two values (value_1 and value_2) representing the start and the end of the range that will be summed (or subtracted if the value is < 0) to the start of each gene, and another two values (value_3 and value_4) representing the start and the end of the second range, with value_3 being added or subtracted to the start of the gene, and value_4 being added or subtracted to the end of the gene. The script will perform a two-sided search of ribosomes mapped within the first and then the second range and will combine the two data frames with the subsets of peaks and including the Translation_initiatio_ratio and the ORF_translation_ratio.
+If method "ratios" is entered, the user can choose two values (value_1 and value_2) representing the start and the end of the first range. The values will be summed (or subtracted if the values are < 0) to the start coordinate of each gene (i.e. position 0). The user will choose another two values (value_3 and value_4) representing the start and the end of the second range, with value_3 being added or subtracted to the start of the gene, and value_4 being added or subtracted to the end of the gene. The script will perform a two-sided search of ribosomes mapped within the first and then the second range and will combine the two data frames with the subsets of peaks and including the Translation_initiatio_ratio and the ORF_translation_ratio.
+
 
 # NOTE: this script is meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools) and Normalize_alt_predict.R.
