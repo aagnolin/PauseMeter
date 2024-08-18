@@ -37,17 +37,25 @@ An Excel file named Test_codon_usage_table.xlsx is provided together with the sc
 # RiboScout
 ## Description
 RiboScout is an alt_predict-based R script that subsets ribosome pausing peaks mapped within defined coordinates relative to the start or end of genes to perform further calculations. 
-This script can calculate initiation and ORF translation/pausing ratios, log2 asymmetry score, and plot metagene profiles.
-The coordinates can be defined by the user when selecting the "ratios" method or are fixed when selecting the "asymmetry" or "metagene" methods (see usage section for more information).
-If method "ratios" is entered, the user can choose two values (value_1 and value_2) representing the start and the end of the first range. The values will be summed (or subtracted if the values are < 0) to the start coordinate of each gene (i.e. position 0). The user will choose another two values (value_3 and value_4) representing the start and the end of the second range, with value_3 being added or subtracted to the start of the gene, and value_4 being added or subtracted to the end of the gene.
-The script will then perform a two-sided search of ribosomes mapped within the first and then the second range and will combine the two data frames of subsets of peaks and include the calculations of Translation_initiatio_ratio and the ORF_translation_ratio. These two metrics are calculated as follows:
-- Translation_initiation_ratio: Sum of counts of all peaks in the first coordinate range / (absolute value of value_1 + absolute value of value_2)
-- ORF_translation_ratio: Sum of counts of all peaks in the second coordinate range / 
+This script can calculate initiation and ORF density ratios, log2 asymmetry score, and plot metagene profiles.
+The coordinates can be defined by the user when selecting the "ratios" method or are fixed when selecting the "asymmetry" or "metagene" methods.
 
- Suggested values are:
+If method "ratios" is entered, the user can choose two values (value_1 and value_2) representing the start and the end of the first range. The values will be summed (or subtracted if the values are < 0) to the start coordinate of each gene (i.e. position 0). The user will choose another two values (value_3 and value_4) representing the start and the end of the second range, with value_3 being added or subtracted to the start position of the gene, and value_4 being added or subtracted to the end position of the gene. Importantly, value_2 must be >= value_1, value_3 must be >= value_2 and > 0, and value_4 must be > value_3.
+The script will then perform a two-sided search of ribosomes mapped within the first and then the second range and will combine the two data frames of subsets of peaks and include the calculations of Translation_initiatio_ratio and the ORF_translation_ratio, i.e. the average ribosome density in each range. These two metrics are calculated as follows:
+- Translation_initiation_ratio: Sum of counts of all peaks in the first coordinate range / (absolute value of value_1 + absolute value of value_2)
+- ORF_translation_ratio: Sum of counts of all peaks in the second coordinate range / (gene_length - value_3 + value_4)
+
+Suggested values are:
 - value_1 = -15
 - value_2 = 5
 - value_3 = 5
 - value_4 = 0
-With this selection, the first range will include the Ribosome Binding Site (RBS) and the start and second codon, while the second range will start from the end of the second codon and end at the end of each gene.
+
+With this selection, the first range will include the Ribosome Binding Site (RBS) - for most bacteria - and the start and second codon, while the second range will start from the end of the second codon and stop at the end of each gene.
+
+If method "asymmetry" is entered, the script will the the information on genes coordinates and gene lengths stored in the supplied gene_info_df .csv file to locate the first and second half of each gene, and it will sum the counts of ribosomal peaks on each gene for both halves. Finally, the script will calculate the log2-asymmetry score for each gene as follows:
+- log2_asymmetry_score =  log2(Sum_Norm_count_second_half / Sum_Norm_count_first_half)
+
+A box plot
+
 ## NOTE: this script is meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools) and Normalize_alt_predict.R.
