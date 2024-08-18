@@ -1,5 +1,6 @@
 # Introduction
 Suite of scripts to perform qualitative and quantitative analyses on ribosome profiling data.
+
 NOTE: these scripts are meant to be used in conjunction with alt_predict (https://github.com/BiosystemsDataAnalysis/PausePredictionTools).
 
 # PauseMeter
