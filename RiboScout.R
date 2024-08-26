@@ -218,13 +218,14 @@ if (method == "ranges") {
   library(ggplot2)
   p <- ggplot(data = df_Ribo_reads_target_1,
               mapping = aes(x = relative_position)) +
-    geom_freqpoly(bins = 220, linewidth = 0.8) +
-    geom_bar(alpha = 0.5, width = 0.5) +
+    geom_histogram(bins = 220, alpha = 0.5, size = 0.05, col = 'grey30') +
+    geom_freqpoly(bins = 220, linewidth = 0.8, col = "black") +
     geom_vline(xintercept = 0, linetype = "dashed", colour = "black", alpha = 0.6, linewidth = 0.7) +
     scale_x_continuous(limits = c(-20, 200)) +
     scale_y_continuous(expand = c(0,0)) +
     theme_bw() +
-    labs(x = "Position") +
+    labs(x = "Position",
+         y = "Count") +
     theme(plot.subtitle = element_text(face = "bold"),
           plot.caption = element_text(face = "bold"),
           axis.title = element_text(face = "bold"),
