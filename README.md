@@ -34,60 +34,6 @@ Arguments:
 
 [filter_threshold] : Optional filter threshold for data (only include data with count >= filter_threshold) [DEFAULT = 1]
 
-# RiboScout
-## Description
-RiboScout is an alt_predict-based R script that subsets ribosome peaks mapped within defined coordinates relative to the start or end of genes to perform further calculations. 
-This script can calculate initiation and ORF density ratios, log2-asymmetry score, and plot metagene profiles.
-The coordinates can be defined by the user when selecting the "ratios" method or are fixed when selecting the "asymmetry" or "metagene" methods.
-## Method "ratios"
-If method "ratios" is entered, the user can choose two values (value_1 and value_2) representing the start and the end of the first range. The values will be summed (or subtracted if the values are < 0) to the start coordinate of each gene (i.e. position 0). The user will choose another two values (value_3 and value_4) representing the start and the end of the second range, with value_3 being added or subtracted to the start position of the gene, and value_4 being added or subtracted to the end position of the gene. Importantly, value_2 must be >= value_1, value_3 must be >= value_2 and > 0, and value_4 must be > value_3.
-The script will then perform a two-sided search of ribosomes mapped within the first and then the second range and will combine the two data frames of subsets of peaks and include the calculations of Translation_initiatio_ratio and the ORF_translation_ratio, i.e. the average ribosome density in each range. These two metrics are calculated as follows:
-- Translation_initiation_ratio: Sum of counts of all peaks in the first coordinate range / (absolute value of value_1 + absolute value of value_2)
-- ORF_translation_ratio: Sum of counts of all peaks in the second coordinate range / (gene_length - value_3 + value_4)
-
-Suggested values are:
-- value_1 = -15
-- value_2 = 5
-- value_3 = 5
-- value_4 = 0
-
-With this selection, the first range will include the Ribosome Binding Site (RBS) - for most bacteria - and the start and second codon, while the second range will start from the end of the second codon and stop at the end of each gene.
-## Method "asymmetry"
-Asymmetry score has been used as an important metric for ribosome profiling methodology testing (Gerashchenko and Gladyshev, 2014; Mohammad et al., 2019).
-If method "asymmetry" is entered, the script will use the information on genes coordinates and gene lengths stored in the supplied gene_info_df .csv file to locate the first and second half of each gene, and it will sum the counts of ribosomal peaks on each gene for both halves. Finally, the script will calculate the log2-asymmetry score for each gene as follows:
-- log2_asymmetry_score =  log2(Sum_Norm_count_second_half / Sum_Norm_count_first_half)
-
-Additionally, the density_per_nt is calculated as (Sum_Norm_count_first_half + Sum_Norm_count_second_half)/gene_length.
-
-A box plot combining the log2-asymmetry scores of all genes is then generated.
-By default, all genes are used for plotting, but the user can generate box plots applying filtering of genes based on their density per nucleotide which is included in the asymmetry score output .csv file. 
-## Method "metagene"
-Finally, if method "metagene" is entered, the script will subset all ribosome peaks in the range of coordinates between -20 and 200 (with 0 being the start of the gene) and will assign a position to each ribosomal peak relative to the start coordinate of the gene on which it was mapped (relative_position).
-The resulting data is used to generate a metagene profile plot.
-## Usage
-Required libraries:
-- dplyr
-- readr
-- ggplot2
-
-Usage: Rscript RiboScout.R Normalized_alt_predict_file.csv gene_info_df.csv <method> <subtract/add_value_1> <subtract/add_value_2> <subtract/add_value_3> <subtract/add_value_4>
-
-Arguments:
-
-  Normalized_alt_predict_file.csv: output file from alt_predict_v2.py normalized with Normalize_alt_predict.R
-  
-  gene_info_df.csv: file containing gene information generated with CreateGeneInfo.R
-  
-  <method>: Analysis method ('ranges', 'asymmetry', or 'metagene')
-  
-  <subtract/add_value_1>: Value to subtract or add relative to start position of each gene (first range) [Only for 'ranges' method]
-  
-  <subtract/add_value_2>: Value to subtract or add relative to start position of each gene (first range) [Only for 'ranges' method]
-  
-  <subtract/add_value_3>: Value to subtract or add relative to start position of each gene (second range) [Only for 'ranges' method]
-  
-  <subtract/add_value_4>: Value to subtract or add relative to end position of each gene (second range) [Only for 'ranges' method]
-
 # Normalize_alt_predict
 ## Description
 This script normalizes ribosome profiling counts in alt_predict output files by multiplying the counts of each mapped ribosome profiling peak by the ratio 
